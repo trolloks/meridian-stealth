@@ -18,6 +18,7 @@ export class Player {
     this.stepPhase = 0;
     this.speed = 0;
     this.noise = 0;
+    this.lures = 3;
     this.radius = PLAYER.radius;
     this.stepTimer = 0;
     this.concealed = false;

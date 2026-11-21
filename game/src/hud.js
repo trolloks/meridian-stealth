@@ -27,6 +27,7 @@ export function createHud() {
   const intelTime = element('intel-time');
   const intelHint = element('intel-hint');
   const intelGoal = element('intel-goal');
+  const intelLures = element('intel-lures');
   const objectives = element('intel-objectives');
   const coverTag = element('cover-tag');
   let toastTimer = 0;
@@ -96,7 +97,12 @@ export function createHud() {
       intelHint.classList.toggle('spot', tier === 'spot');
     },
 
-    setIntel({ concealed, moving, crouching, alarms, time, relicsTaken, total, exitUnlocked }) {
+    setLures(count) {
+      intelLures.textContent = String(count);
+      intelLures.classList.toggle('exposed', count === 0);
+    },
+
+    setIntel({ concealed, moving, crouching, lures, alarms, time, relicsTaken, total, exitUnlocked }) {
       intelGoal.textContent = exitUnlocked ? 'EXIT OPEN' : `COLLECT ${total - relicsTaken}`;
       intelGoal.classList.toggle('hidden', exitUnlocked);
       intelGoal.classList.toggle('exposed', !exitUnlocked);
@@ -104,6 +110,7 @@ export function createHud() {
       intelVisibility.classList.toggle('hidden', concealed);
       intelVisibility.classList.toggle('exposed', !concealed);
       intelNoise.textContent = crouching ? 'SILENT' : moving ? 'FOOTSTEPS' : 'STILL';
+      intelLures.textContent = String(lures);
       intelAlarms.textContent = String(alarms);
       intelTime.textContent = time;
       const entries = objectives.children;
