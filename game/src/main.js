@@ -322,6 +322,7 @@ function step(dt) {
   level.update(dt);
   footprints.update(dt);
   bursts.update(dt);
+  if (lures) lures.update(dt);
 
   if (level.relics.every((relic) => relic.collected) && level.inExit(player.position.x, player.position.z)) {
     completeLevel();
