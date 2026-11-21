@@ -182,6 +182,8 @@ export const LEVELS = [
       { x: 1.0, z: 9.4, color: '#8f7dff', power: 9 },
       { x: 25.0, z: 9.4, color: '#8f7dff', power: 9 },
       { x: 13.0, z: 8.0, color: '#8fffe0', power: 13 },
+      { x: 6.8, z: 12.2, color: '#8f7dff', power: 9 },
+      { x: 19.2, z: 3.8, color: '#cbb7ff', power: 9 },
     ],
     shadows: [
       { x: 6.4, z: 8.6, w: 3.0, d: 2.6 },

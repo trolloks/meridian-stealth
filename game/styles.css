@@ -166,7 +166,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.2em;
   color: var(--cyan-soft);
   text-transform: uppercase;

@@ -58,7 +58,7 @@ function writeCone(cone, points, blockers, reach) {
 function makeQuerySprite() {
   const material = new THREE.SpriteMaterial({ map: queryTexture, transparent: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(0.55, 0.55, 0.55);
+  sprite.scale.set(0.72, 0.72, 0.72);
   sprite.visible = false;
   return sprite;
 }
@@ -66,7 +66,7 @@ function makeQuerySprite() {
 function makeAlarmSprite() {
   const material = new THREE.SpriteMaterial({ map: alarmTexture, transparent: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(0.6, 0.6, 0.6);
+  sprite.scale.set(0.8, 0.8, 0.8);
   sprite.visible = false;
   return sprite;
 }
@@ -103,10 +103,10 @@ export class Guard {
     this.cone = makeCone(this.range, '#ffb24d', 0.14);
     scene.add(this.cone.mesh, this.cone.edge);
     this.query = makeQuerySprite();
-    this.query.position.set(0, 2.42, 0);
+    this.query.position.set(0, 2.55, 0);
     this.group.add(this.query);
     this.alarm = makeAlarmSprite();
-    this.alarm.position.set(0, 2.42, 0);
+    this.alarm.position.set(0, 2.55, 0);
     this.group.add(this.alarm);
     this.flashlight = new THREE.SpotLight('#fff0c9', 26, 9, this.fov * 0.62, 0.55, 1.6);
     this.flashlight.position.set(0, 1.55, 0);
@@ -206,6 +206,10 @@ export class Guard {
     this.model.armRight.rotation.z = swing * 0.7;
     this.flashlight.intensity = this.state === 'alarm' ? 38 : 26;
     this.flashlight.color.set(this.state === 'alarm' ? '#ff9a8a' : '#fff0c9');
+    const ringColor = this.state === 'alarm' || this.state === 'search' ? '#ff4d5e' : this.awareness > GUARD.suspectAt ? '#ff8a3d' : '#ffb24d';
+    this.model.ring.material.color.set(ringColor);
+    this.model.ring.material.opacity = this.state === 'alarm' ? 0.65 : this.awareness > GUARD.suspectAt ? 0.55 : 0.35;
+    this.model.ring.scale.setScalar(this.state === 'alarm' ? 1 + Math.sin(this.stepPhase * 2) * 0.12 : 1);
 
     this.query.visible = this.awareness > GUARD.suspectAt && this.state !== 'alarm';
     this.alarm.visible = this.state === 'alarm' || this.state === 'search';

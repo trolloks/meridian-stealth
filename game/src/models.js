@@ -81,6 +81,11 @@ function crate(def, materials) {
     slat.rotation.z = 0.55 * side;
     group.add(slat);
   }
+  const rim = 0.045;
+  group.add(box(def.w + 0.02, rim, rim, materials.edgeWarm, 0, def.h + 0.02, def.d / 2));
+  group.add(box(def.w + 0.02, rim, rim, materials.edgeWarm, 0, def.h + 0.02, -def.d / 2));
+  group.add(box(rim, rim, def.d + 0.02, materials.edgeWarm, def.w / 2, def.h + 0.02, 0));
+  group.add(box(rim, rim, def.d + 0.02, materials.edgeWarm, -def.w / 2, def.h + 0.02, 0));
   return group;
 }
 
@@ -167,6 +172,7 @@ function caseModel(def, materials) {
   const plinthHeight = def.h * 0.58;
   group.add(box(def.w, plinthHeight, def.d, materials.marble, 0, plinthHeight / 2, 0));
   group.add(box(def.w + 0.05, 0.06, def.d + 0.05, materials.brass, 0, plinthHeight, 0));
+  group.add(box(def.w + 0.08, 0.025, def.d + 0.08, materials.edgeWarm, 0, plinthHeight + 0.045, 0));
   const glass = box(def.w * 0.82, def.h - plinthHeight, def.d * 0.82, materials.glass, 0, plinthHeight + (def.h - plinthHeight) / 2, 0);
   glass.castShadow = false;
   group.add(glass);
@@ -196,10 +202,18 @@ export function makeRelic(def, materials) {
   group.add(box(1.24, 0.08, 1.24, materials.brass, 0, 0.99, 0));
   const inner = box(0.86, 0.02, 0.86, materials.darkMetal, 0, 1.02, 0);
   group.add(inner);
+  const plinthRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.72, 0.85, 32),
+    new THREE.MeshBasicMaterial({ color: main ? '#5ff2e3' : '#ffb24d', transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  plinthRing.rotation.x = -Math.PI / 2;
+  plinthRing.position.y = 0.018;
+  group.add(plinthRing);
   const gemMaterial = main ? materials.cyan.clone() : materials.amber.clone();
-  gemMaterial.emissiveIntensity = main ? 2.1 : 1.8;
-  const gem = new THREE.Mesh(new THREE.OctahedronGeometry(main ? 0.34 : 0.24, 0), gemMaterial);
-  gem.position.y = main ? 1.62 : 1.52;
+  gemMaterial.emissiveIntensity = main ? 1.6 : 1.8;
+  const gem = new THREE.Mesh(new THREE.OctahedronGeometry(main ? 0.36 : 0.24, 0), gemMaterial);
+  gem.scale.y = main ? 1.5 : 1.05;
+  gem.position.y = main ? 1.66 : 1.52;
   gem.castShadow = true;
   const halo = new THREE.Mesh(
     new THREE.TorusGeometry(main ? 0.48 : 0.36, 0.012, 8, 48),
@@ -207,7 +221,7 @@ export function makeRelic(def, materials) {
   );
   halo.position.y = gem.position.y;
   halo.rotation.x = Math.PI / 2;
-  const light = new THREE.PointLight(main ? '#8fffe0' : '#ffcf8a', main ? 12 : 4, main ? 8 : 4, 2);
+  const light = new THREE.PointLight(main ? '#8fffe0' : '#ffcf8a', main ? 9 : 4, main ? 8 : 4, 2);
   light.position.y = gem.position.y;
   const haloGroup = new THREE.Group();
   haloGroup.add(gem, halo, light);
@@ -221,7 +235,7 @@ export function makeRelic(def, materials) {
     group.add(shaft);
     const floorRing = new THREE.Mesh(new THREE.RingGeometry(0.78, 0.86, 40), materials.cyan.clone());
     floorRing.material.transparent = true;
-    floorRing.material.opacity = 0.2;
+    floorRing.material.opacity = 0.12;
     floorRing.material.depthWrite = false;
     floorRing.rotation.x = -Math.PI / 2;
     floorRing.position.y = 1.03;
@@ -375,7 +389,14 @@ export function makeGuardModel(materials) {
   group.add(flashlight);
   const badge = box(0.06, 0.14, 0.02, materials.brass, 0.3, 1.26, -0.02);
   group.add(badge);
-  return { group, legLeft, legRight, armLeft, armRight, flashlight, head };
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.36, 0.5, 28),
+    new THREE.MeshBasicMaterial({ color: '#ffb24d', transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.02;
+  group.add(ring);
+  return { group, legLeft, legRight, armLeft, armRight, flashlight, head, ring };
 }
 
 export function makePlayerModel(materials) {
@@ -418,8 +439,8 @@ export function makePlayerModel(materials) {
     group.add(arm);
   }
   const marker = new THREE.Mesh(
-    new THREE.RingGeometry(0.38, 0.48, 32),
-    new THREE.MeshBasicMaterial({ color: '#5ff2e3', transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+    new THREE.RingGeometry(0.46, 0.6, 32),
+    new THREE.MeshBasicMaterial({ color: '#5ff2e3', transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
   );
   marker.rotation.x = -Math.PI / 2;
   marker.position.y = 0.025;
@@ -449,5 +470,12 @@ export function makeCameraModel(materials) {
   const led = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshBasicMaterial({ color: '#ff4d5e' }));
   led.position.set(0.18, 0.38, 0);
   group.add(led);
+  const baseRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.32, 0.44, 24),
+    new THREE.MeshBasicMaterial({ color: '#ff4d5e', transparent: true, opacity: 0.42, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  baseRing.rotation.x = -Math.PI / 2;
+  baseRing.position.y = -2.28;
+  group.add(baseRing);
   return { group, housing, eye };
 }
