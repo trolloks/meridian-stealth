@@ -25,6 +25,8 @@ export function createHud() {
   const intelAlarms = element('intel-alarms');
   const intelSentries = element('intel-sentries');
   const intelTime = element('intel-time');
+  const intelHint = element('intel-hint');
+  const intelGoal = element('intel-goal');
   const objectives = element('intel-objectives');
   const coverTag = element('cover-tag');
   let toastTimer = 0;
@@ -89,9 +91,15 @@ export function createHud() {
       intelState.classList.toggle('spot', tier === 'spot');
       intelState.textContent = tier === 'spot' ? 'SPOTTED' : tier === 'watch' ? 'SUSPICIOUS' : 'CLEAR';
       intelPercent.textContent = `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
+      intelHint.textContent = tier === 'spot' ? 'RUN · BREAK LINE OF SIGHT' : tier === 'watch' ? 'A GUARD IS LOOKING · BREAK SIGHT' : 'NO ONE HAS SEEN YOU';
+      intelHint.classList.toggle('watch', tier === 'watch');
+      intelHint.classList.toggle('spot', tier === 'spot');
     },
 
     setIntel({ concealed, moving, crouching, alarms, time, relicsTaken, total, exitUnlocked }) {
+      intelGoal.textContent = exitUnlocked ? 'EXIT OPEN' : `COLLECT ${total - relicsTaken}`;
+      intelGoal.classList.toggle('hidden', exitUnlocked);
+      intelGoal.classList.toggle('exposed', !exitUnlocked);
       intelVisibility.textContent = concealed ? 'IN COVER' : 'OPEN FLOOR';
       intelVisibility.classList.toggle('hidden', concealed);
       intelVisibility.classList.toggle('exposed', !concealed);
