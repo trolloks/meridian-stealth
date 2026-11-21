@@ -89,6 +89,7 @@ export class Guard {
     this.lastSeen = null;
     this.alarmTimer = 0;
     this.searchTimer = 0;
+    this.investigateTimer = 0;
     this.phase = index * 1.7;
     this.stepPhase = 0;
     this.moveSpeed = 0;
@@ -179,6 +180,15 @@ export class Guard {
         }
       }
       if (this.alarmTimer <= 0) this.state = 'return';
+    } else if (this.state === 'investigate') {
+      this.investigateTimer -= dt;
+      if (this.lastSeen && distance(this.position.x, this.position.z, this.lastSeen.x, this.lastSeen.z) > 0.5) {
+        this.walkToward(this.lastSeen.x, this.lastSeen.z, GUARD.patrolSpeed * 1.6, dt);
+      } else {
+        this.state = 'search';
+        this.searchTimer = GUARD.searchTime;
+      }
+      if (this.investigateTimer <= 0) this.state = 'return';
     } else if (this.state === 'search') {
       this.searchTimer -= dt;
       this.facing = turnToward(this.facing, this.facing + Math.sin(this.phase + this.searchTimer * 2.2) * 0.9, 2.4 * dt);

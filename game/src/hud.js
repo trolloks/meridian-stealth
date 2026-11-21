@@ -25,6 +25,8 @@ export function createHud() {
   const intelAlarms = element('intel-alarms');
   const intelSentries = element('intel-sentries');
   const intelTime = element('intel-time');
+  const intelLures = element('intel-lures');
+  const intelSecurity = element('intel-security');
   const objectives = element('intel-objectives');
   const coverTag = element('cover-tag');
   let toastTimer = 0;
@@ -91,12 +93,21 @@ export function createHud() {
       intelPercent.textContent = `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
     },
 
-    setIntel({ concealed, moving, crouching, alarms, time, relicsTaken, total, exitUnlocked }) {
+    setLures(count) {
+      intelLures.textContent = String(count);
+      intelLures.classList.toggle('exposed', count === 0);
+    },
+
+    setIntel({ concealed, moving, crouching, lures, alarms, watchers = 0, alerts = 0, time, relicsTaken, total, exitUnlocked }) {
       intelVisibility.textContent = concealed ? 'IN COVER' : 'OPEN FLOOR';
       intelVisibility.classList.toggle('hidden', concealed);
       intelVisibility.classList.toggle('exposed', !concealed);
       intelNoise.textContent = crouching ? 'SILENT' : moving ? 'FOOTSTEPS' : 'STILL';
+      intelLures.textContent = String(lures);
       intelAlarms.textContent = String(alarms);
+      intelSecurity.textContent = alerts > 0 ? `${alerts} ALERT` : watchers > 0 ? `${watchers} WATCH` : 'PATROL';
+      intelSecurity.classList.toggle('exposed', alerts > 0);
+      intelSecurity.classList.toggle('hidden', alerts === 0 && watchers === 0);
       intelTime.textContent = time;
       const entries = objectives.children;
       for (let index = 0; index < entries.length; index += 1) {
@@ -230,6 +241,18 @@ export function createHud() {
       }
 
       for (const guard of actors) {
+        if (guard.points && guard.points.length > 1) {
+          context.setLineDash([3, 4]);
+          context.strokeStyle = 'rgba(255, 178, 77, 0.28)';
+          context.lineWidth = 1;
+          context.beginPath();
+          context.moveTo(mapX(guard.points[0][0]), mapY(guard.points[0][1]));
+          for (let point = 1; point < guard.points.length; point += 1) {
+            context.lineTo(mapX(guard.points[point][0]), mapY(guard.points[point][1]));
+          }
+          context.stroke();
+          context.setLineDash([]);
+        }
         const alarmed = guard.state === 'alarm' || guard.state === 'search';
         const color = alarmed ? '#ff4d5e' : guard.awareness > 0.3 ? '#ff8a3d' : '#ffb24d';
         context.strokeStyle = alarmed ? 'rgba(255, 77, 94, 0.34)' : 'rgba(255, 178, 77, 0.26)';

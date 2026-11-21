@@ -14,6 +14,7 @@ import { Player } from './player.js';
 import { Guard, SecurityCamera } from './guard.js';
 import { Footprints, ShardBursts } from './effects.js';
 import { stageShot } from './shots.js';
+import { LureManager } from './lures.js';
 
 const canvas = document.getElementById('game');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -38,6 +39,7 @@ let level = null;
 let player = null;
 let guards = [];
 let cameras = [];
+let lures = null;
 let levelIndex = 0;
 let mode = 'title';
 let levelTime = 0;
@@ -68,10 +70,12 @@ function disposeWorld() {
   if (player) player.dispose(scene);
   for (const guard of guards) guard.dispose(scene);
   for (const camera of cameras) camera.dispose(scene);
+  if (lures) lures.dispose();
   if (level) level.dispose();
   player = null;
   guards = [];
   cameras = [];
+  lures = null;
   level = null;
 }
 
@@ -90,7 +94,21 @@ function loadLevel(index) {
     camera.onAlarm = registerCameraAlarm;
     return camera;
   });
+  lures = new LureManager(scene, (x, z) => {
+    audio.lurePing();
+    hud.toast('LURE PING · A GUARD IS COMING TO LOOK', 2.4);
+    for (const guard of guards) {
+      const distance = Math.hypot(guard.position.x - x, guard.position.z - z);
+      if (distance > 6.5) continue;
+      guard.lastSeen = { x, z };
+      guard.awareness = Math.max(guard.awareness, 0.45);
+      guard.investigateTimer = 6.5;
+      if (guard.state === 'patrol' || guard.state === 'suspect') guard.state = 'investigate';
+      guard.paintCone();
+    }
+  });
   level.setExitUnlocked(false);
+  hud.setLures(player.lures);
   levelTime = 0;
   levelAlarms = 0;
   exposure = 0;
@@ -218,6 +236,25 @@ function getCaught() {
   hud.announce('Caught. Try the wing again.');
 }
 
+function throwLure() {
+  if (mode !== 'play' || !level) return;
+  if (player.lures <= 0) {
+    hud.toast('NO LURES LEFT · FINISH THE WING QUIETLY', 1.8);
+    return;
+  }
+  let x = player.position.x + Math.cos(player.facing) * 2.4;
+  let z = player.position.z + Math.sin(player.facing) * 2.4;
+  if (level.collides(x, z, 0.18) || x < 0.5 || z < 0.5 || x > level.data.size.w - 0.5 || z > level.data.size.d - 0.5) {
+    x = player.position.x + Math.cos(player.facing) * 1.1;
+    z = player.position.z + Math.sin(player.facing) * 1.1;
+  }
+  player.lures -= 1;
+  hud.setLures(player.lures);
+  lures.throwAt(x, z);
+  audio.lure();
+  hud.toast('LURE OUT · LISTEN FOR THE PING', 1.8);
+}
+
 function tryInteract() {
   if (mode !== 'play' || !level) return;
   const relic = level.relicNear(player.position.x, player.position.z, 1.45);
@@ -285,6 +322,7 @@ function step(dt) {
   level.update(dt);
   footprints.update(dt);
   bursts.update(dt);
+  if (lures) lures.update(dt);
 
   if (level.relics.every((relic) => relic.collected) && level.inExit(player.position.x, player.position.z)) {
     completeLevel();
@@ -297,6 +335,7 @@ function ambientStep(dt) {
   level.update(dt);
   footprints.update(dt);
   bursts.update(dt);
+  if (lures) lures.update(dt);
 }
 
 function drawMinimap() {
@@ -313,6 +352,8 @@ function updateReadout() {
   const alerted = guards.some((guard) => guard.state === 'alarm' || guard.state === 'search')
     || cameras.some((camera) => camera.awareness > 0.8);
   const tier = alerted || exposure > 0.8 ? 'spot' : exposure > 0.3 ? 'watch' : 'clear';
+  const watchers = guards.filter((guard) => guard.awareness > 0.3 && guard.state !== 'alarm' && guard.state !== 'search').length;
+  const alerts = guards.filter((guard) => guard.state === 'alarm' || guard.state === 'search').length;
   const concealed = level.isConcealed(player.position.x, player.position.z, player.crouching);
   player.setConcealed(concealed);
   hud.setExposure(exposure, tier);
@@ -321,7 +362,10 @@ function updateReadout() {
     concealed,
     moving: player.speed > 0.25,
     crouching: player.crouching,
+    lures: player.lures,
     alarms: levelAlarms,
+    watchers,
+    alerts,
     time: formatTime(levelTime),
     relicsTaken: taken,
     total,
@@ -431,6 +475,7 @@ function onKeyDown(event) {
     if (mode === 'play') pauseGame();
     else if (mode === 'pause') resumeGame();
   } else if (event.code === 'KeyE') tryInteract();
+  else if (event.code === 'KeyQ') throwLure();
   else if (event.code === 'KeyR') {
     if (mode === 'play' || mode === 'pause' || mode === 'caught') restartWing();
   }

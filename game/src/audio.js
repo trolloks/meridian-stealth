@@ -154,6 +154,15 @@ export class AudioEngine {
     this.tone(880, 0.05, { type: 'square', volume: 0.03 });
   }
 
+  lure() {
+    this.noise(0.12, 0.035, 1400);
+  }
+
+  lurePing() {
+    this.tone(1180, 0.22, { type: 'triangle', volume: 0.07, slide: 1560 });
+    setTimeout(() => this.tone(880, 0.18, { type: 'sine', volume: 0.05 }), 80);
+  }
+
   heartbeat(dt, intensity) {
     this.heartbeatRate = intensity;
     if (intensity <= 0.05) return;
