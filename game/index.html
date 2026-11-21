@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#05090e">
+<title>NIGHTGLASS — a museum stealth heist</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%2305090e%27/%3E%3Cpath d=%27M16 4l9 12-9 12-9-12z%27 fill=%27none%27 stroke=%27%235ff2e3%27 stroke-width=%272%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<canvas id="game" aria-label="Nightglass: a top-down 3D stealth game. Sneak through the Meridian Museum, stay out of the guards' vision cones, take three relics and reach the glowing exit."></canvas>
+<div id="grade" aria-hidden="true"></div>
+<div id="alarm-flash" aria-hidden="true"></div>
+
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-word">NIGHTGLASS</span>
+      <span class="brand-tag">MERIDIAN MUSEUM</span>
+    </div>
+    <div class="objective">
+      <div class="eyebrow" id="level-subtitle">MERIDIAN MUSEUM · 23:40</div>
+      <div class="level-name" id="level-name">THE ATRIUM</div>
+      <div class="relic-line">
+        <span id="relic-label">RECOVER THE PIECES</span>
+        <span class="pips" id="relic-pips"></span>
+      </div>
+    </div>
+    <div class="minimap">
+      <div class="minimap-head"><span>SECURITY PLAN</span><span id="minimap-clock">23:40</span></div>
+      <canvas id="minimap" width="480" height="300"></canvas>
+    </div>
+  </div>
+
+  <div class="exposure" id="exposure">
+    <div class="eyebrow">EXPOSURE</div>
+    <div class="meter" aria-hidden="true">
+      <span id="exposure-fill"></span>
+      <i style="left:30%"></i><i style="left:60%"></i><i style="left:86%"></i>
+    </div>
+    <div class="exposure-state" id="exposure-state">CLEAR</div>
+  </div>
+
+  <div class="controls">
+    <span><b>WASD</b> move</span>
+    <span><b>SHIFT</b> sneak</span>
+    <span><b>E</b> take</span>
+    <span><b>ESC</b> pause</span>
+    <span><b>R</b> restart</span>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="alert-banner" class="alert-banner"><span>ALARM RAISED</span><em>Break line of sight</em></div>
+  <div id="status" class="sr-only" role="status" aria-live="polite"></div>
+</div>
+
+<div id="screens">
+  <section id="screen-title" class="screen visible">
+    <div class="title-wrap">
+      <div class="title-kicker">MERIDIAN MUSEUM <span>//</span> AFTER CLOSING</div>
+      <h1 class="logo">NIGHT<span>GLASS</span></h1>
+      <p class="title-sub">Three pieces. One night. <em>Nobody sees you leave.</em></p>
+      <div class="title-actions">
+        <button id="btn-begin" class="btn primary" type="button">BEGIN THE HEIST <kbd>ENTER</kbd></button>
+        <button id="btn-manual" class="btn ghost" type="button">FIELD MANUAL</button>
+      </div>
+      <div id="manual" class="manual hidden">
+        <div><b>WASD</b><span>Move through the galleries</span></div>
+        <div><b>SHIFT</b><span>Sneak: slower, quieter, harder to see</span></div>
+        <div><b>E</b><span>Take a relic or enter the exit</span></div>
+        <div><b>ESC</b><span>Pause · <b>R</b> restart the wing</span></div>
+        <p>Guards see along their amber cones. Break the line of sight behind tall cover, crouch behind low crates, and keep out of the pale pools of shadowlight. If a guard fills the alarm, run — the hunt cools after a while.</p>
+      </div>
+      <div class="title-foot"><span>AN ORIGINAL STEALTH HEIST</span><span>RUNS OFFLINE · KEYBOARD + MOUSE</span></div>
+    </div>
+  </section>
+
+  <section id="screen-brief" class="screen">
+    <div class="card brief-card">
+      <div class="eyebrow" id="brief-kicker">APPROACH 01</div>
+      <h2 id="brief-name">THE ATRIUM</h2>
+      <p id="brief-text">Lift the three Meridian pieces and leave through the east service door.</p>
+      <div class="brief-meta">
+        <span><b id="brief-relics">3</b> pieces</span>
+        <span><b>0</b> alarms allowed to linger</span>
+      </div>
+      <button id="btn-enter" class="btn primary" type="button">ENTER THE MUSEUM <kbd>ENTER</kbd></button>
+    </div>
+  </section>
+
+  <section id="screen-pause" class="screen">
+    <div class="card small-card">
+      <div class="eyebrow">SIGNAL LOST</div>
+      <h2>PAUSED</h2>
+      <p>The gallery holds its breath.</p>
+      <button id="btn-resume" class="btn primary" type="button">RESUME <kbd>ESC</kbd></button>
+      <button id="btn-restart" class="btn ghost" type="button">RESTART WING <kbd>R</kbd></button>
+      <button id="btn-quit" class="btn ghost" type="button">LEAVE THE MUSEUM</button>
+    </div>
+  </section>
+
+  <section id="screen-caught" class="screen caught">
+    <div class="card small-card">
+      <div class="eyebrow">THE NIGHT IS OVER</div>
+      <h2>CAUGHT</h2>
+      <p id="caught-text">A guard’s torch found you. The museum remembers every step.</p>
+      <button id="btn-retry" class="btn primary" type="button">TRY THE WING AGAIN <kbd>R</kbd></button>
+      <button id="btn-caught-quit" class="btn ghost" type="button">LEAVE THE MUSEUM</button>
+    </div>
+  </section>
+
+  <section id="screen-clear" class="screen">
+    <div class="card clear-card">
+      <div class="eyebrow">WING CLEAR</div>
+      <h2 id="clear-name">THE ATRIUM</h2>
+      <div class="stats">
+        <div><span>TIME</span><b id="clear-time">00:00</b></div>
+        <div><span>PIECES</span><b id="clear-relics">3 / 3</b></div>
+        <div><span>ALARMS</span><b id="clear-alarms">0</b></div>
+        <div><span>RANK</span><b id="clear-rank">S</b></div>
+      </div>
+      <button id="btn-next" class="btn primary" type="button">NEXT WING <kbd>ENTER</kbd></button>
+    </div>
+  </section>
+
+  <section id="screen-victory" class="screen">
+    <div class="card clear-card victory-card">
+      <div class="eyebrow">THE AURORA IS OUT</div>
+      <h2>NIGHTGLASS</h2>
+      <p class="victory-line">The museum wakes to three empty plinths and one open service door.</p>
+      <div class="stats">
+        <div><span>TOTAL TIME</span><b id="victory-time">00:00</b></div>
+        <div><span>PIECES</span><b id="victory-relics">9 / 9</b></div>
+        <div><span>ALARMS</span><b id="victory-alarms">0</b></div>
+        <div><span>RANK</span><b id="victory-rank">S</b></div>
+      </div>
+      <button id="btn-again" class="btn primary" type="button">STEAL IT AGAIN <kbd>ENTER</kbd></button>
+    </div>
+  </section>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
