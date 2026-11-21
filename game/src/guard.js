@@ -276,10 +276,10 @@ export class Guard {
   paintCone() {
     const points = visionPolygon(this.position.x, this.position.z, this.facing, this.fov / 2, this.range, this.level.blockers, CONE_RAYS);
     writeCone(this.cone, points, this.level.blockers, this.range);
-    const color = this.state === 'alarm' ? '#ff2d45' : this.awareness > GUARD.suspectAt ? '#ff7a1a' : '#ff9f3d';
+    const color = this.state === 'alarm' ? '#ff2d45' : this.awareness > GUARD.suspectAt ? '#ff8a1f' : '#ff9a2e';
     this.cone.mesh.material.color.set(color);
     this.cone.edge.material.color.set(color);
-    this.cone.mesh.material.opacity = this.state === 'alarm' ? 0.44 : this.awareness > GUARD.suspectAt ? 0.34 : 0.26;
+    this.cone.mesh.material.opacity = this.state === 'alarm' ? 0.5 : this.awareness > GUARD.suspectAt ? 0.4 : 0.3;
   }
 
   dispose(scene) {

@@ -145,7 +145,7 @@ html, body {
 }
 
 .eyebrow {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.32em;
   text-transform: uppercase;
@@ -193,7 +193,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: clamp(232px, 22vw, 288px);
+  width: clamp(252px, 24vw, 316px);
 }
 
 .minimap {
@@ -210,7 +210,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.24em;
   color: var(--muted);
   text-transform: uppercase;
@@ -284,17 +284,19 @@ html, body {
 
 .intel-detection {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
+  gap: 4px 8px;
   padding: 6px 8px 5px;
   margin-bottom: 7px;
   background: rgba(95, 242, 227, 0.06);
   border-left: 2px solid var(--cyan);
 }
 
-.intel-detection .eyebrow { flex: 1; }
+.intel-detection .eyebrow { flex: 1 0 100%; }
 .intel-detection strong {
-  font-size: 20px;
+  flex: 1 1 auto;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--cyan-soft);
@@ -305,7 +307,8 @@ html, body {
 .intel-detection strong.spot { color: var(--red); }
 .intel-detection em {
   font-style: normal;
-  font-size: 10px;
+  flex: none;
+  font-size: 11px;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
@@ -319,7 +322,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 9px;
+  font-size: 10.5px;
   letter-spacing: 0.16em;
   color: var(--muted);
   text-transform: uppercase;
@@ -339,7 +342,7 @@ html, body {
 .intel-objectives li {
   display: flex;
   gap: 6px;
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.08em;
   color: var(--muted);
   text-transform: uppercase;
@@ -356,7 +359,7 @@ html, body {
   gap: 3px;
   padding-top: 7px;
   border-top: 1px solid rgba(95, 242, 227, 0.14);
-  font-size: 8.5px;
+  font-size: 9px;
   letter-spacing: 0.06em;
   color: var(--muted);
   text-transform: uppercase;
@@ -393,8 +396,8 @@ html, body {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  max-width: 420px;
-  font-size: 9px;
+  max-width: 460px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);

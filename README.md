@@ -39,7 +39,7 @@ Take all three relics in a wing to unlock its exit. Alarm-raising guards, camera
 - `game/src/hud.js`, `effects.js`, `audio.js`, `camera.js` — overlay, feedback, WebAudio and the isometric camera.
 - `game/src/main.js`, `shots.js` — screen flow, fixed-step loop and the screenshot staging.
 - `game/vendor/` — three.js, vendored and minified, so the game runs offline.
-- `screenshots/` — three real renders of the game (the first is the cover).
+- `screenshots/` — four real renders of the game (the first is the cover).
 - `main.ts` — the hand-in program: copies `game/` and `screenshots/` to the output folder and writes `dossier.json` with make.fun's builder.
 
 The game is original: its names, museum, art direction, character designs, level layouts and synthesised sound are all made for this entry. three.js is used as a rendering library under its MIT licence; see `game/vendor/` and `THIRD_PARTY_NOTICES.md`.

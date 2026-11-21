@@ -212,6 +212,12 @@ export function makeRelic(def, materials) {
   const haloGroup = new THREE.Group();
   haloGroup.add(gem, halo, light);
   group.add(haloGroup);
+  const beam = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.045, 0.11, main ? 3.4 : 2.4, 10, 1, true),
+    new THREE.MeshBasicMaterial({ color: main ? '#8fffe0' : '#ffd08a', transparent: true, opacity: main ? 0.09 : 0.11, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  beam.position.y = (main ? 1.62 : 1.52) + (main ? 1.7 : 1.2);
+  group.add(beam);
   if (main) {
     const shaft = new THREE.Mesh(
       new THREE.CylinderGeometry(0.07, 0.95, 4.6, 24, 1, true),
