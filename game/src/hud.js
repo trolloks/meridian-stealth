@@ -18,6 +18,15 @@ export function createHud() {
   const alarmFlash = element('alarm-flash');
   const toastElement = element('toast');
   const status = element('status');
+  const intelState = element('intel-state');
+  const intelPercent = element('intel-percent');
+  const intelVisibility = element('intel-visibility');
+  const intelNoise = element('intel-noise');
+  const intelAlarms = element('intel-alarms');
+  const intelSentries = element('intel-sentries');
+  const intelTime = element('intel-time');
+  const objectives = element('intel-objectives');
+  const coverTag = element('cover-tag');
   let toastTimer = 0;
   let levelData = null;
   let currentScreen = 'title';
@@ -50,6 +59,16 @@ export function createHud() {
         const mark = document.createElement('i');
         pips.appendChild(mark);
       }
+      objectives.replaceChildren();
+      for (const relic of data.relics) {
+        const item = document.createElement('li');
+        item.textContent = relic.name;
+        objectives.appendChild(item);
+      }
+      const exit = document.createElement('li');
+      exit.textContent = 'Reach the exit';
+      objectives.appendChild(exit);
+      intelSentries.textContent = `${data.guards.length} · ${data.cameras.length} CAM`;
       state.setRelics(0, data.relics.length);
     },
 
@@ -66,6 +85,36 @@ export function createHud() {
       exposureState.classList.toggle('watch', tier === 'watch');
       exposureState.classList.toggle('spot', tier === 'spot');
       exposureState.textContent = tier === 'spot' ? 'SPOTTED' : tier === 'watch' ? 'WATCHED' : 'CLEAR';
+      intelState.classList.toggle('watch', tier === 'watch');
+      intelState.classList.toggle('spot', tier === 'spot');
+      intelState.textContent = tier === 'spot' ? 'SPOTTED' : tier === 'watch' ? 'SUSPICIOUS' : 'CLEAR';
+      intelPercent.textContent = `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`;
+    },
+
+    setIntel({ concealed, moving, crouching, alarms, time, relicsTaken, total, exitUnlocked }) {
+      intelVisibility.textContent = concealed ? 'IN COVER' : 'OPEN FLOOR';
+      intelVisibility.classList.toggle('hidden', concealed);
+      intelVisibility.classList.toggle('exposed', !concealed);
+      intelNoise.textContent = crouching ? 'SILENT' : moving ? 'FOOTSTEPS' : 'STILL';
+      intelAlarms.textContent = String(alarms);
+      intelTime.textContent = time;
+      const entries = objectives.children;
+      for (let index = 0; index < entries.length; index += 1) {
+        if (index < total) entries[index].classList.toggle('done', index < relicsTaken);
+        else entries[index].classList.toggle('done', Boolean(exitUnlocked));
+      }
+    },
+
+    setCoverTag(x, y, label, kind) {
+      coverTag.textContent = label;
+      coverTag.style.left = `${x}px`;
+      coverTag.style.top = `${y}px`;
+      coverTag.classList.toggle('exposed', kind === 'exposed');
+      coverTag.classList.add('visible');
+    },
+
+    hideCoverTag() {
+      coverTag.classList.remove('visible');
     },
 
     setAlarm(on) {

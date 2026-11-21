@@ -1,6 +1,5 @@
 [
   { "name": "01-vault-heist.jpg", "query": "?shot=cover" },
   { "name": "02-atrium.jpg", "query": "?shot=atrium" },
-  { "name": "03-long-gallery.jpg", "query": "?shot=gallery" },
-  { "name": "04-alarm.jpg", "query": "?shot=alert" }
+  { "name": "03-alarm.jpg", "query": "?shot=alert" }
 ]

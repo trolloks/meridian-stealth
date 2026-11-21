@@ -38,9 +38,9 @@ export function marbleTexture(accent = '#5f8f96') {
   const surface = canvas(size);
   const context = surface.getContext('2d');
   const base = context.createLinearGradient(0, 0, size, size);
-  base.addColorStop(0, '#25454f');
-  base.addColorStop(0.5, '#1c3a44');
-  base.addColorStop(1, '#152d36');
+  base.addColorStop(0, '#44707c');
+  base.addColorStop(0.5, '#38636e');
+  base.addColorStop(1, '#2e5661');
   context.fillStyle = base;
   context.fillRect(0, 0, size, size);
 
@@ -194,8 +194,69 @@ export function iconTexture(symbol, color) {
   return texture;
 }
 
+export function artTexture(variant = 1) {
+  const surface = canvas(512);
+  surface.height = 352;
+  const context = surface.getContext('2d');
+  let seed = variant * 7919 + 17;
+  const random = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const palettes = [
+    ['#0d2830', '#d8b15c', '#68c9bd', '#8d3f3a'],
+    ['#241a2b', '#c9a35a', '#8a7dff', '#5f8f86'],
+    ['#1b2933', '#e2d6b4', '#5ff2e3', '#b35a48'],
+  ];
+  const palette = palettes[(variant - 1) % palettes.length];
+  context.fillStyle = palette[0];
+  context.fillRect(0, 0, 512, 352);
+  const gradient = context.createLinearGradient(0, 0, 512, 352);
+  gradient.addColorStop(0, palette[2] + '22');
+  gradient.addColorStop(1, palette[1] + '18');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 512, 352);
+  context.globalAlpha = 0.85;
+  for (let shape = 0; shape < 9; shape += 1) {
+    context.fillStyle = palette[1 + Math.floor(random() * 3)];
+    context.globalAlpha = 0.18 + random() * 0.4;
+    const kind = Math.floor(random() * 3);
+    if (kind === 0) {
+      context.beginPath();
+      context.arc(80 + random() * 352, 70 + random() * 212, 18 + random() * 72, 0, Math.PI * 2);
+      context.fill();
+    } else if (kind === 1) {
+      context.save();
+      context.translate(80 + random() * 352, 70 + random() * 212);
+      context.rotate(random() * Math.PI);
+      context.fillRect(-30 - random() * 40, -10 - random() * 24, 60 + random() * 90, 20 + random() * 40);
+      context.restore();
+    } else {
+      context.beginPath();
+      context.moveTo(60 + random() * 392, 60 + random() * 232);
+      context.lineTo(60 + random() * 392, 60 + random() * 232);
+      context.lineTo(60 + random() * 392, 60 + random() * 232);
+      context.closePath();
+      context.fill();
+    }
+  }
+  context.globalAlpha = 1;
+  context.strokeStyle = 'rgba(255,255,255,0.18)';
+  context.lineWidth = 2;
+  for (let line = 0; line < 5; line += 1) {
+    context.beginPath();
+    context.moveTo(0, 40 + line * 66 + random() * 20);
+    context.bezierCurveTo(140, random() * 352, 360, random() * 352, 512, 40 + line * 66);
+    context.stroke();
+  }
+  speckle(context, 512, 260, 0.05, '#000000');
+  const texture = new THREE.CanvasTexture(surface);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 export function makeMaterials() {
-  const floor = new THREE.MeshStandardMaterial({ map: marbleTexture(), roughness: 0.44, metalness: 0.1, color: '#cfdedf' });
+  const floor = new THREE.MeshStandardMaterial({ map: marbleTexture(), roughness: 0.46, metalness: 0.08, color: '#eaf5f4' });
   const carpet = new THREE.MeshStandardMaterial({ map: carpetTexture(), roughness: 0.95, metalness: 0 });
   const wood = new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.74, metalness: 0.03, color: '#c9b39a' });
   const metal = new THREE.MeshStandardMaterial({ map: metalTexture(), roughness: 0.44, metalness: 0.7, color: '#c3d6dd' });
@@ -210,7 +271,7 @@ export function makeMaterials() {
     opacity: 0.18,
     depthWrite: false,
   });
-  const stone = new THREE.MeshStandardMaterial({ color: '#3d5d66', roughness: 0.78, metalness: 0.05 });
+  const stone = new THREE.MeshStandardMaterial({ color: '#4a707a', roughness: 0.76, metalness: 0.05 });
   const foliage = new THREE.MeshStandardMaterial({ color: '#1f4a38', roughness: 0.9, metalness: 0 });
   const uniform = new THREE.MeshStandardMaterial({ color: '#35566e', roughness: 0.66, metalness: 0.18 });
   const uniformTrim = new THREE.MeshStandardMaterial({ color: '#ffb24d', roughness: 0.45, metalness: 0.3, emissive: '#6b3a08', emissiveIntensity: 0.5 });

@@ -28,11 +28,38 @@
         <span class="pips" id="relic-pips"></span>
       </div>
     </div>
-    <div class="minimap">
-      <div class="minimap-head"><span>SECURITY PLAN</span><span id="minimap-clock">23:40</span></div>
-      <canvas id="minimap" width="480" height="300"></canvas>
+    <div class="right-rail">
+      <div class="minimap">
+        <div class="minimap-head"><span>SECURITY PLAN</span><span id="minimap-clock">23:40</span></div>
+        <canvas id="minimap" width="480" height="300"></canvas>
+      </div>
+      <div class="intel">
+        <div class="intel-head"><span>FIELD READOUT</span><span id="intel-time">00:00</span></div>
+        <div class="intel-detection">
+          <span class="eyebrow">DETECTION</span>
+          <strong id="intel-state">CLEAR</strong>
+          <em id="intel-percent">0%</em>
+        </div>
+        <div class="intel-rows">
+          <div><span>VISIBILITY</span><b id="intel-visibility">IN COVER</b></div>
+          <div><span>NOISE</span><b id="intel-noise">SILENT</b></div>
+          <div><span>ALARMS</span><b id="intel-alarms">0</b></div>
+          <div><span>SENTRIES</span><b id="intel-sentries">0 · 0 CAM</b></div>
+        </div>
+        <div class="intel-objectives">
+          <span class="eyebrow">OBJECTIVE</span>
+          <ul id="intel-objectives"></ul>
+        </div>
+        <div class="intel-legend">
+          <span><i class="tall"></i>Tall cover breaks sight</span>
+          <span><i class="low"></i>Low cover hides crouched</span>
+          <span><i class="shadow"></i>Shadowlight damps detection</span>
+        </div>
+      </div>
     </div>
   </div>
+
+  <div id="cover-tag" class="cover-tag">HIDDEN</div>
 
   <div class="exposure" id="exposure">
     <div class="eyebrow">EXPOSURE</div>

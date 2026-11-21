@@ -20,6 +20,7 @@ export class Player {
     this.noise = 0;
     this.radius = PLAYER.radius;
     this.stepTimer = 0;
+    this.concealed = false;
     this.group.position.set(this.position.x, 0, this.position.z);
     this.group.rotation.y = -this.facing;
     scene.add(this.group);
@@ -67,6 +68,12 @@ export class Player {
 
   eyeHeight() {
     return PLAYER.standEye * this.crouchAmount + 0.02;
+  }
+
+  setConcealed(concealed) {
+    this.concealed = concealed;
+    this.model.marker.material.color.set(concealed ? '#68ffb0' : '#5ff2e3');
+    this.model.marker.material.opacity = concealed ? 0.72 : 0.5;
   }
 
   dispose(scene) {

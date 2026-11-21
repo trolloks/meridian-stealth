@@ -4,7 +4,8 @@
 
 import * as THREE from '../vendor/three.module.min.js';
 import { makeCover, makeExit, makeLamp, makeRelic, makeShadow, makeWall } from './models.js';
-import { inShadow, lineBlocked } from './vision.js';
+import { artTexture } from './materials.js';
+import { distanceToBox, inShadow, lineBlocked } from './vision.js';
 import { clamp, pushCircleOut } from './math2d.js';
 
 function floorFor(data, materials) {
@@ -19,6 +20,40 @@ function floorFor(data, materials) {
   floor.position.set(data.size.w / 2, 0, data.size.d / 2);
   floor.receiveShadow = true;
   return floor;
+}
+
+function wallArtFor(data, materials, group) {
+  const textures = [artTexture(1), artTexture(2), artTexture(3)];
+  const paintingMaterial = (index) => new THREE.MeshStandardMaterial({
+    map: textures[index % textures.length],
+    roughness: 0.72,
+    metalness: 0.02,
+    emissive: '#101a1c',
+    emissiveIntensity: 0.35,
+  });
+  const hang = (x, z, rotation, index, scale = 1) => {
+    const frame = new THREE.Group();
+    const backing = new THREE.Mesh(new THREE.BoxGeometry(2.6 * scale, 1.8 * scale, 0.1), materials.darkMetal);
+    backing.castShadow = true;
+    frame.add(backing);
+    const edgeTop = new THREE.Mesh(new THREE.BoxGeometry(2.7 * scale, 0.07, 0.12), materials.brass);
+    edgeTop.position.y = 0.9 * scale;
+    frame.add(edgeTop);
+    const edgeBottom = edgeTop.clone();
+    edgeBottom.position.y = -0.9 * scale;
+    frame.add(edgeBottom);
+    const painting = new THREE.Mesh(new THREE.PlaneGeometry(2.25 * scale, 1.45 * scale), paintingMaterial(index));
+    painting.position.z = 0.06;
+    frame.add(painting);
+    frame.position.set(x, 1.85, z);
+    frame.rotation.y = rotation;
+    group.add(frame);
+  };
+  const w = data.size.w;
+  const north = [w * 0.17, w * 0.5, w * 0.83];
+  north.forEach((x, index) => hang(x, 0.08, 0, index));
+  hang(0.08, data.size.d * 0.34, Math.PI / 2, 2);
+  hang(w - 0.08, data.size.d * 0.64, -Math.PI / 2, 1);
 }
 
 function inlayFor(data, materials, group) {
@@ -116,6 +151,7 @@ export function createLevel(scene, data, materials) {
 
   group.add(floorFor(data, materials));
   inlayFor(data, materials, group);
+  wallArtFor(data, materials, group);
 
   for (const wall of data.walls) {
     group.add(makeWall(wall, materials));
@@ -145,16 +181,16 @@ export function createLevel(scene, data, materials) {
   const dust = dustFor(data);
   group.add(dust);
 
-  const ambient = new THREE.AmbientLight(data.ambient.color, data.ambient.intensity * 1.5);
+  const ambient = new THREE.AmbientLight(data.ambient.color, data.ambient.intensity * 2.3);
   scene.add(ambient);
-  const hemisphere = new THREE.HemisphereLight(data.sky.top, '#041016', 0.95);
+  const hemisphere = new THREE.HemisphereLight(data.sky.top, '#041016', 1.35);
   scene.add(hemisphere);
-  const fill = new THREE.DirectionalLight('#a9d7e2', 0.85);
+  const fill = new THREE.DirectionalLight('#a9d7e2', 1.3);
   fill.position.set(data.size.w / 2 - 4, 11, data.size.d + 18);
   fill.target.position.set(data.size.w / 2, 0, data.size.d / 2);
   scene.add(fill);
   scene.add(fill.target);
-  const moon = new THREE.DirectionalLight(data.moon.color, data.moon.intensity * 1.35);
+  const moon = new THREE.DirectionalLight(data.moon.color, data.moon.intensity * 1.55);
   moon.position.set(data.size.w / 2 + data.moon.x, data.moon.y, data.size.d / 2 + data.moon.z);
   moon.target.position.set(data.size.w / 2, 0, data.size.d / 2);
   moon.castShadow = true;
@@ -256,6 +292,16 @@ export function createLevel(scene, data, materials) {
 
     inShadow(x, z) {
       return inShadow(data.shadows, x, z);
+    },
+
+    isConcealed(x, z, crouching) {
+      if (inShadow(data.shadows, x, z)) return true;
+      const minHeight = crouching ? 1.0 : 2.0;
+      for (let index = 0; index < solids.length; index += 1) {
+        const solid = solids[index];
+        if (solid.h >= minHeight && distanceToBox(x, z, solid) < 0.7) return true;
+      }
+      return false;
     },
 
     inExit(x, z) {

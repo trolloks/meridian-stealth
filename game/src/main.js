@@ -22,7 +22,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.35;
+renderer.toneMappingExposure = 1.7;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
@@ -282,11 +282,6 @@ function step(dt) {
     suspectCooldown = 2.4;
   }
   audio.heartbeat(dt, exposure > 0.25 ? exposure : 0);
-  const alerted = guards.some((guard) => guard.state === 'alarm' || guard.state === 'search')
-    || cameras.some((camera) => camera.awareness > 0.8);
-  hud.setExposure(exposure, alerted ? 'spot' : exposure > 0.3 ? 'watch' : 'clear');
-  hud.setAlarm(alerted);
-
   level.update(dt);
   footprints.update(dt);
   bursts.update(dt);
@@ -308,6 +303,38 @@ function drawMinimap() {
   if (!level) return;
   const taken = level.relics.filter((relic) => relic.collected).length;
   hud.drawMinimap(level, player, guards, cameras, taken);
+}
+
+function updateReadout() {
+  if (!level || !player) return;
+  const taken = level.relics.filter((relic) => relic.collected).length;
+  const total = level.relics.length;
+  const unlocked = taken >= total;
+  const alerted = guards.some((guard) => guard.state === 'alarm' || guard.state === 'search')
+    || cameras.some((camera) => camera.awareness > 0.8);
+  const tier = alerted || exposure > 0.8 ? 'spot' : exposure > 0.3 ? 'watch' : 'clear';
+  const concealed = level.isConcealed(player.position.x, player.position.z, player.crouching);
+  player.setConcealed(concealed);
+  hud.setExposure(exposure, tier);
+  hud.setAlarm(alerted);
+  hud.setIntel({
+    concealed,
+    moving: player.speed > 0.25,
+    crouching: player.crouching,
+    alarms: levelAlarms,
+    time: formatTime(levelTime),
+    relicsTaken: taken,
+    total,
+    exitUnlocked: unlocked,
+  });
+  if (!player.group.visible) {
+    hud.hideCoverTag();
+    return;
+  }
+  const point = view.project(player.position.x, player.position.z);
+  if (alerted || exposure > 0.4) hud.setCoverTag(point.x, point.y - 66, 'EXPOSED', 'exposed');
+  else if (concealed) hud.setCoverTag(point.x, point.y - 66, 'HIDDEN', 'hidden');
+  else hud.hideCoverTag();
 }
 
 function resetToTitle() {
@@ -465,6 +492,7 @@ function frame(now) {
     if (minimapTimer <= 0) {
       minimapTimer = 0.12;
       drawMinimap();
+      updateReadout();
     }
   } else if (mode === 'title' || mode === 'brief') {
     ambientStep(dt);
@@ -500,13 +528,19 @@ if (shotName) {
   view.sway = 0;
   view.swaySpeed = 0;
   view.shake = 0;
+  exposure = staged.exposure;
+  levelTime = staged.clock ?? 0;
+  levelAlarms = staged.alarm ? 1 : 0;
   mode = 'shot';
+  view.place();
+  updateReadout();
   drawMinimap();
   document.body.dataset.shot = shotName;
   let painted = 0;
   const paintShot = () => {
     view.place();
     renderer.render(scene, view.camera);
+    updateReadout();
     painted += 1;
     if (painted < 8) requestAnimationFrame(paintShot);
     else window.__shotReady = true;

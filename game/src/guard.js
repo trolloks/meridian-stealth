@@ -22,7 +22,6 @@ function makeCone(range, color, opacity, y = 0.03) {
     color,
     transparent: true,
     opacity,
-    blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
   });
@@ -32,7 +31,7 @@ function makeCone(range, color, opacity, y = 0.03) {
 
   const edgeGeometry = new THREE.BufferGeometry();
   edgeGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array((CONE_RAYS + 2) * 3), 3));
-  const edgeMaterial = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.55, depthWrite: false });
+  const edgeMaterial = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.85, depthWrite: false });
   const edge = new THREE.Line(edgeGeometry, edgeMaterial);
   edge.position.y = y + 0.005;
   edge.renderOrder = 3;
@@ -131,7 +130,7 @@ export class Guard {
     if (range > this.range) return 0;
     const bearing = Math.atan2(dz, dx);
     if (Math.abs(angleDelta(this.facing, bearing)) > this.fov / 2) return 0;
-    const minHeight = player.crouching ? 1.25 : 2.0;
+    const minHeight = player.crouching ? 1.0 : 2.0;
     if (this.level.blockedSight(this.position.x, this.position.z, player.position.x, player.position.z, minHeight)) return 0;
     let gain = this.kind === 'camera' ? GUARD.cameraGain : GUARD.visionGain;
     gain *= 1 - DETECTION.distanceFalloff * (range / this.range);
@@ -267,10 +266,10 @@ export class Guard {
   paintCone() {
     const points = visionPolygon(this.position.x, this.position.z, this.facing, this.fov / 2, this.range, this.level.blockers, CONE_RAYS);
     writeCone(this.cone, points, this.level.blockers, this.range);
-    const color = this.state === 'alarm' ? '#ff4d5e' : this.awareness > GUARD.suspectAt ? '#ff8a3d' : '#ffb24d';
+    const color = this.state === 'alarm' ? '#ff2d45' : this.awareness > GUARD.suspectAt ? '#ff7a1a' : '#ff9f3d';
     this.cone.mesh.material.color.set(color);
     this.cone.edge.material.color.set(color);
-    this.cone.mesh.material.opacity = this.state === 'alarm' ? 0.24 : this.awareness > GUARD.suspectAt ? 0.2 : 0.13;
+    this.cone.mesh.material.opacity = this.state === 'alarm' ? 0.44 : this.awareness > GUARD.suspectAt ? 0.34 : 0.26;
   }
 
   dispose(scene) {
@@ -345,7 +344,7 @@ export class SecurityCamera {
     writeCone(this.cone, points, this.level.blockers, this.range);
     this.cone.mesh.material.color.set(this.awareness > 0.35 ? '#ff7a1a' : '#ff4d5e');
     this.cone.edge.material.color.set(this.awareness > 0.35 ? '#ff7a1a' : '#ff4d5e');
-    this.cone.mesh.material.opacity = 0.1 + this.awareness * 0.12;
+    this.cone.mesh.material.opacity = 0.22 + this.awareness * 0.16;
   }
 
   dispose(scene) {

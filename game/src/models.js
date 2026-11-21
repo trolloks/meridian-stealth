@@ -197,7 +197,7 @@ export function makeRelic(def, materials) {
   const inner = box(0.86, 0.02, 0.86, materials.darkMetal, 0, 1.02, 0);
   group.add(inner);
   const gemMaterial = main ? materials.cyan.clone() : materials.amber.clone();
-  gemMaterial.emissiveIntensity = main ? 2.6 : 1.9;
+  gemMaterial.emissiveIntensity = main ? 2.1 : 1.8;
   const gem = new THREE.Mesh(new THREE.OctahedronGeometry(main ? 0.34 : 0.24, 0), gemMaterial);
   gem.position.y = main ? 1.62 : 1.52;
   gem.castShadow = true;
@@ -207,7 +207,7 @@ export function makeRelic(def, materials) {
   );
   halo.position.y = gem.position.y;
   halo.rotation.x = Math.PI / 2;
-  const light = new THREE.PointLight(main ? '#8fffe0' : '#ffcf8a', main ? 22 : 5, main ? 9 : 4, 2);
+  const light = new THREE.PointLight(main ? '#8fffe0' : '#ffcf8a', main ? 12 : 4, main ? 8 : 4, 2);
   light.position.y = gem.position.y;
   const haloGroup = new THREE.Group();
   haloGroup.add(gem, halo, light);
@@ -215,13 +215,13 @@ export function makeRelic(def, materials) {
   if (main) {
     const shaft = new THREE.Mesh(
       new THREE.CylinderGeometry(0.07, 0.95, 4.6, 24, 1, true),
-      new THREE.MeshBasicMaterial({ color: '#8fffe0', transparent: true, opacity: 0.055, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+      new THREE.MeshBasicMaterial({ color: '#8fffe0', transparent: true, opacity: 0.04, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
     );
     shaft.position.y = 1.62 + 2.3;
     group.add(shaft);
     const floorRing = new THREE.Mesh(new THREE.RingGeometry(0.78, 0.86, 40), materials.cyan.clone());
     floorRing.material.transparent = true;
-    floorRing.material.opacity = 0.35;
+    floorRing.material.opacity = 0.2;
     floorRing.material.depthWrite = false;
     floorRing.rotation.x = -Math.PI / 2;
     floorRing.position.y = 1.03;
