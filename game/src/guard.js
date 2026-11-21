@@ -6,11 +6,12 @@ import * as THREE from '../vendor/three.module.min.js';
 import { makeCameraModel, makeGuardModel } from './models.js';
 import { GUARD, DETECTION } from './config.js';
 import { angleDelta, clamp, distance, turnToward } from './math2d.js';
-import { visionPolygon } from './vision.js';import { iconTexture } from './materials.js';
+import { visionPolygon } from './vision.js';import { iconTexture, speechTexture } from './materials.js';
 
 const CONE_RAYS = 45;
 const queryTexture = iconTexture('?', '#ffb24d');
 const alarmTexture = iconTexture('!', '#ff4d5e');
+const speechBubbleTexture = speechTexture('WHAT WAS THAT?');
 
 function makeCone(range, color, opacity, y = 0.03) {
   const geometry = new THREE.BufferGeometry();
@@ -63,6 +64,14 @@ function makeQuerySprite() {
   return sprite;
 }
 
+function makeSpeechBubble() {
+  const material = new THREE.SpriteMaterial({ map: speechBubbleTexture, transparent: true, depthWrite: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(2.3, 0.58, 0.58);
+  sprite.visible = false;
+  return sprite;
+}
+
 function makeAlarmSprite() {
   const material = new THREE.SpriteMaterial({ map: alarmTexture, transparent: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
@@ -105,6 +114,9 @@ export class Guard {
     this.query = makeQuerySprite();
     this.query.position.set(0, 2.55, 0);
     this.group.add(this.query);
+    this.bubble = makeSpeechBubble();
+    this.bubble.position.set(0, 3.05, 0);
+    this.group.add(this.bubble);
     this.alarm = makeAlarmSprite();
     this.alarm.position.set(0, 2.55, 0);
     this.group.add(this.alarm);
@@ -213,6 +225,7 @@ export class Guard {
 
     this.query.visible = this.awareness > GUARD.suspectAt && this.state !== 'alarm';
     this.alarm.visible = this.state === 'alarm' || this.state === 'search';
+    this.bubble.visible = this.state === 'suspect' && this.awareness > GUARD.suspectAt;
     this.paintCone();
   }
 

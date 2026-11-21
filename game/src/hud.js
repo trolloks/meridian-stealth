@@ -50,7 +50,7 @@ export function createHud() {
     setLevel(data, index) {
       levelData = data;
       element('level-name').textContent = data.name;
-      element('level-subtitle').textContent = data.subtitle;
+      element('level-subtitle').textContent = `${data.subtitle} · WING ${index + 1}/3`;
       element('brief-kicker').textContent = `APPROACH ${String(index + 1).padStart(2, '0')}`;
       element('brief-name').textContent = data.name;
       element('brief-text').textContent = data.brief;

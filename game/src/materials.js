@@ -172,6 +172,29 @@ export function glowTexture(color = '#ffffff') {
   return texture;
 }
 
+export function speechTexture(text) {
+  const size = 512;
+  const surface = canvas(size);
+  surface.height = 128;
+  const context = surface.getContext('2d');
+  context.clearRect(0, 0, size, 128);
+  context.fillStyle = 'rgba(4, 10, 14, 0.86)';
+  context.strokeStyle = '#ffb24d';
+  context.lineWidth = 4;
+  context.beginPath();
+  context.roundRect(8, 12, 496, 96, 22);
+  context.fill();
+  context.stroke();
+  context.fillStyle = '#ffd08a';
+  context.font = 'bold 46px "Chakra Petch", system-ui, sans-serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(text, 256, 61);
+  const texture = new THREE.CanvasTexture(surface);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 export function iconTexture(symbol, color) {
   const size = 128;
   const surface = canvas(size);
